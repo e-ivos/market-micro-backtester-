@@ -25,6 +25,10 @@ timestamp,price
 2026-01-01T09:30:00,100.0
 2026-01-01T09:31:00,100.4
 ```
+## Example Output
+Sharpe Ratio: 1.42  
+Max Drawdown: -8.3%  
+Total Return: 12.5%
 
 ## Files
 - `engine.py` - core backtest engine
