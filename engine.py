@@ -1,3 +1,4 @@
+# Core event-driven engine for processing price data and executing trades
 from __future__ import annotations
 
 from dataclasses import dataclass
