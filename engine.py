@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable
 import pandas as pd
 
 
@@ -10,11 +9,17 @@ import pandas as pd
 class PositionState:
     cash: float = 10_000.0
     units: int = 0
+    cumulative_transaction_costs: float = 0.0
 
 
 class BacktestEngine:
-    def __init__(self, initial_cash: float = 10_000.0) -> None:
+    def __init__(
+        self,
+        initial_cash: float = 10_000.0,
+        transaction_cost_rate: float = 0.001,
+    ) -> None:
         self.initial_cash = initial_cash
+        self.transaction_cost_rate = transaction_cost_rate
 
     def run(self, prices: pd.DataFrame, strategy: "BaseStrategy") -> pd.DataFrame:
         required = {"timestamp", "price"}
@@ -29,7 +34,9 @@ class BacktestEngine:
         for idx, row in df.iterrows():
             price = float(row["price"])
             signal = strategy.generate_signal(df.iloc[: idx + 1])
-            self._apply_signal(signal, price, state)
+
+            transaction_cost = self._apply_signal(signal, price, state)
+
             portfolio_value = state.cash + state.units * price
             records.append(
                 {
@@ -38,19 +45,37 @@ class BacktestEngine:
                     "signal": signal,
                     "cash": state.cash,
                     "units": state.units,
+                    "transaction_cost": transaction_cost,
+                    "cumulative_transaction_costs": state.cumulative_transaction_costs,
                     "portfolio_value": portfolio_value,
                 }
             )
+
         return pd.DataFrame(records)
 
-    @staticmethod
-    def _apply_signal(signal: str, price: float, state: PositionState) -> None:
-        if signal == "BUY" and state.cash >= price:
-            state.cash -= price
-            state.units += 1
+    def _apply_signal(self, signal: str, price: float, state: PositionState) -> float:
+        transaction_cost = 0.0
+
+        if signal == "BUY":
+            transaction_cost = price * self.transaction_cost_rate
+            total_buy_cost = price + transaction_cost
+
+            if state.cash >= total_buy_cost:
+                state.cash -= total_buy_cost
+                state.units += 1
+                state.cumulative_transaction_costs += transaction_cost
+            else:
+                transaction_cost = 0.0
+
         elif signal == "SELL" and state.units > 0:
-            state.cash += price
+            transaction_cost = price * self.transaction_cost_rate
+            net_sell_proceeds = price - transaction_cost
+
+            state.cash += net_sell_proceeds
             state.units -= 1
+            state.cumulative_transaction_costs += transaction_cost
+
+        return transaction_cost
 
 
 class BaseStrategy:
