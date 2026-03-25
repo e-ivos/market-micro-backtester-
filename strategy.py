@@ -1,3 +1,4 @@
+# mean-reversion strategy based on price deviations
 from __future__ import annotations
 
 import pandas as pd
