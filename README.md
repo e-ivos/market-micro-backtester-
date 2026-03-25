@@ -1,6 +1,6 @@
 # market-micro-backtester
 
-A small event-driven market backtester in Python. It simulates a simple mean-reversion strategy on historical price data and reports performance metrics like total return, volatility, Sharpe ratio, and max drawdown.
+A small event-driven market backtester in Python. It simulates a simple mean-reversion strategy on historical price data and reports performance metrics like total return, volatility, Sharpe ratio, and max drawdown. Models transaction costs on buys and sells for more realistic performance evaluation
 
 ## Why this is useful
 This project demonstrates:
@@ -9,6 +9,7 @@ This project demonstrates:
 - event-driven design
 - performance analytics
 - testing
+- 
 
 ## Quick start
 ```bash
