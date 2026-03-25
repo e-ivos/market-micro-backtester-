@@ -1,3 +1,4 @@
+# computes sharpe ratio, volatility, and drawdown
 from __future__ import annotations
 
 import numpy as np
